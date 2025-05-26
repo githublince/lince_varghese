@@ -1,0 +1,342 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lince Varghese - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        .section-title {
+            @apply text-3xl font-bold mb-6 border-l-4 border-orange-500 pl-4;
+            animation: fadeInLeft 1s ease-in-out;
+        }
+        .project-card {
+            @apply bg-gray-800 p-6 rounded-lg shadow-lg mb-6;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2);
+        }
+        .nav-link {
+            @apply text-gray-300 hover:text-orange-500 transition-colors duration-300;
+        }
+        .btn-primary {
+            @apply bg-orange-500 text-white px-6 py-3 rounded-full hover:bg-orange-600 transition-all duration-300;
+        }
+        .hero-bg {
+            background-color: #1a1a2e;
+        }
+        .skill-icon {
+            @apply mr-2 text-orange-500;
+        }
+        .skill-category {
+            @apply mb-6;
+        }
+        .skill-tag {
+            @apply bg-purple-500 text-white px-4 py-2 rounded-full;
+        }
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Android-specific optimizations */
+        @media (max-width: 640px) {
+            .section-title {
+                @apply text-2xl pl-2;
+            }
+            .project-card {
+                @apply p-4;
+            }
+            .btn-primary {
+                @apply px-4 py-2 text-sm;
+            }
+            .nav-link {
+                @apply text-sm;
+            }
+            .skill-icon {
+                @apply text-lg;
+            }
+        }
+        /* Touch-friendly hover adjustments for Android */
+        @media (hover: none) {
+            .project-card:hover {
+                transform: none;
+                box-shadow: 0 10px 20px rgba(255, 102, 0, 0.2);
+            }
+            .btn-primary:active {
+                @apply bg-orange-600;
+            }
+            .skill-tag:active {
+                @apply bg-purple-600;
+            }
+        }
+    </style>
+</head>
+<body class="smooth-scroll">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 sticky top-0 z-50 py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-orange-500">Lince Varghese</h1>
+            <div class="space-x-4 sm:space-x-6">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#education" class="nav-link">Education</a>
+                <a href="#skills" class="nav-link">Skills</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#certifications" class="nav-link">Certifications</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center hero-bg">
+        <div class="container mx-auto px-4 text-center fade-in">
+            <h1 class="text-4xl sm:text-5xl font-bold mb-4">Data Scientist & Machine Learning Engineer</h1>
+            <p class="text-lg sm:text-xl mb-6">Crafting intelligent solutions with Python, TensorFlow, and NLP. Explore my projects and connect with me!</p>
+            <a href="#contact" class="btn-primary">Get in Touch</a>
+            <div class="mt-6 flex justify-center space-x-4">
+                <a href="mailto:lince210895@hotmail.com" class="text-gray-300 hover:text-orange-500"><i class="fas fa-envelope"></i></a>
+                <a href="http://www.linkedin.com/in/lincevarghese2108" class="text-gray-300 hover:text-orange-500"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title">Education</h2>
+            <div class="space-y-6">
+                <div class="fade-in">
+                    <h3 class="text-xl font-semibold">MCA</h3>
+                    <p>A. P. J. Abdul Kalam Technological University, Kerala</p>
+                    <p>CGPA: 7.94 | 2016 - 2018</p>
+                </div>
+                <div class="fade-in">
+                    <h3 class="text-xl font-semibold">BCA</h3>
+                    <p>Amity University, Uttar Pradesh</p>
+                    <p>CGPA: 8.4 | 2013 - 2016</p>
+                </div>
+                <div class="fade-in">
+                    <h3 class="text-xl font-semibold">12th, Senior School Certificate</h3>
+                    <p>CBSE | Percentage: 79% | 2013</p>
+                </div>
+                <div class="fade-in">
+                    <h3 class="text-xl font-semibold">10th, Secondary School Examination</h3>
+                    <p>CBSE | Percentage: 78% | 2011</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-12 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title">Skills</h2>
+            <div class="space-y-6">
+                <div class="skill-category fade-in">
+                    <h3 class="text-xl font-semibold"><i class="fas fa-code skill-icon"></i>Programming Languages</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="skill-tag"><i class="fab fa-python skill-icon"></i>Python</span>
+                        <span class="skill-tag"><i class="fab fa-java skill-icon"></i>Java</span>
+                        <span class="skill-tag"><i class="fas fa-code skill-icon"></i>C</span>
+                        <span class="skill-tag"><i class="fas fa-code skill-icon"></i>C++</span>
+                        <span class="skill-tag"><i class="fas fa-code skill-icon"></i>R</span>
+                        <span class="skill-tag"><i class="fas fa-database skill-icon"></i>SQL</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h3 class="text-xl font-semibold"><i class="fas fa-cogs skill-icon"></i>Frameworks & Libraries</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>Django</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>NumPy</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>Pandas</span>
+                        <span class="skill-tag"><i class="fas fa-chart-line skill-icon"></i>Matplotlib</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>scikit-learn</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>Seaborn</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>NLTK</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>Keras</span>
+                        <span class="skill-tag"><i class="fas fa-cog skill-icon"></i>TensorFlow</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h3 class="text-xl font-semibold"><i class="fas fa-brain skill-icon"></i>Machine Learning</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="skill-tag"><i class="fas fa-brain skill-icon"></i>Machine Learning</span>
+                        <span class="skill-tag"><i class="fas fa-brain skill-icon"></i>Deep Learning</span>
+                        <span class="skill-tag"><i class="fas fa-eye skill-icon"></i>Computer Vision</span>
+                        <span class="skill-tag"><i class="fas fa-language skill-icon"></i>NLP</span>
+                        <span class="skill-tag"><i class="fas fa-network-wired skill-icon"></i>CNN</span>
+                        <span class="skill-tag"><i class="fas fa-network-wired skill-icon"></i>RNN</span>
+                        <span class="skill-tag"><i class="fas fa-network-wired skill-icon"></i>LSTM</span>
+                        <span class="skill-tag"><i class="fas fa-network-wired skill-icon"></i>Transformer Models</span>
+                        <span class="skill-tag"><i class="fas fa-network-wired skill-icon"></i>Generative Models</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h3 class="text-xl font-semibold"><i class="fas fa-tools skill-icon"></i>Tools</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="skill-tag"><i class="fas fa-chart-bar skill-icon"></i>Tableau</span>
+                        <span class="skill-tag"><i class="fab fa-git-alt skill-icon"></i>Git</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h3 class="text-xl font-semibold"><i class="fas fa-cubes skill-icon"></i>Concepts</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="skill-tag"><i class="fas fa-cubes skill-icon"></i>Data Structures</span>
+                        <span class="skill-tag"><i class="fas fa-cogs skill-icon"></i>Algorithms</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title">Projects</h2>
+            <div class="space-y-8">
+                <div class="project-card fade-in">
+                    <h3 class="text-xl font-semibold">Real-time Facial Emotion Recognition Using CNN</h3>
+                    <p>A real-time vision system using Convolutional Neural Networks for face detection and emotion classification, achieving 92% accuracy.</p>
+                </div>
+                <div class="project-card fade-in">
+                    <h3 class="text-xl font-semibold">Microsoft Malware Detection</h3>
+                    <p>Classified malware using bytes and .asm files with XGBoost and Random Forest, achieving 95% detection accuracy.</p>
+                </div>
+                <div class="project-card fade-in">
+                    <h3 class="text-xl font-semibold">Facebook Friend Recommendation Using Graph Mining</h3>
+                    <p>Built a recommendation system using XGBoost and Random Forest, increasing accuracy by 18% for graph-based data.</p>
+                </div>
+                <div class="project-card fade-in">
+                    <h3 class="text-xl font-semibold">Human Activity Recognition</h3>
+                    <p>Modeled smartphone sensor data for multiclass classification, achieving 90% accuracy with Gyroscope and Accelerometer inputs.</p>
+                </div>
+                <div class="project-card fade-in">
+                    <h3 class="text-xl font-semibold">Semantic Search Engine for Q&A</h3>
+                    <p>Applied NLP techniques (Tf-IDF, Word2Vec) and Logistic Regression for sentiment prediction, processing 50,000+ text entries with 85% accuracy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications Section -->
+    <section id="certifications" class="py-12 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title">Certifications</h2>
+            <ul class="list-disc pl-6 space-y-2 fade-in">
+                <li>Workshop on AI and Deep Learning, Kerala Startup Mission and Future Labs</li>
+                <li>Workshop on DNA Analytics Using Java, Amity University</li>
+                <li>Android Application Development, HTL Infotech Pvt Ltd.</li>
+                <li>Ethical Hacking, Sree Narayana Gurukulam College of Engineering</li>
+                <li>Hands-on Training in Hadoop, Sree Narayana Gurukulam College of Engineering</li>
+                <li>IPv6 Outreach Program, Sree Narayana Gurukulam College of Engineering</li>
+                <li>Conclave on IT Industry Readiness and Futuristic Trends, Amity University</li>
+                <li>Developing Smart Cities Imperatives and Challenges, Lucknow University MBA</li>
+                <li>Excellence in Knowledge Creation, Amity Institute of Information Technology</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-12">
+        <div class="container mx-auto px-4 text-center fade-in">
+            <h2 class="section-title">Contact</h2>
+            <p class="text-lg mb-6">Let's connect to discuss data science, machine learning, or potential collaborations!</p>
+            <div class="flex justify-center space-x-6 mb-6">
+                <span><i class="fas fa-phone"></i> +91 9980651261</span>
+                <span><i class="fas fa-map-marker-alt"></i> Bengaluru, India</span>
+            </div>
+            <a href="mailto:lince210895@hotmail.com" class="btn-primary">Email Me</a>
+            <div class="mt-6">
+                <a href="resume_updated.pdf" class="btn-primary">Download Resume</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-6 text-center">
+        <p>© 2025 Lince Varghese. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Fade-in animation on scroll
+        const fadeInElements = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        fadeInElements.forEach(element => observer.observe(element));
+    </script>
+</body>
+</html>
